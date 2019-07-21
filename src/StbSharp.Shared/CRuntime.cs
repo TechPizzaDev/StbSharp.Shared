@@ -5,6 +5,12 @@ namespace StbSharp
 {
     public static unsafe class CRuntime
     {
+        public static void SetArray<T>(T[] data, T value)
+        {
+            for (int i = 0; i < data.Length; ++i)
+                data[i] = value;
+        }
+
         #region Memory Management
 
         public static void* malloc(ulong size)
