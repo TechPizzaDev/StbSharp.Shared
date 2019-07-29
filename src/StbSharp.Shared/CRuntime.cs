@@ -94,9 +94,9 @@ namespace StbSharp
             }
         }
 
-        public static void memmove(void* a, void* b, ulong size)
+        public static void memmove(void* dst, void* src, ulong size)
         {
-            memmove(a, b, (long)size);
+            memmove(dst, src, (long)size);
         }
 
         public static void memset(void* ptr, byte value, long size)
@@ -160,6 +160,11 @@ namespace StbSharp
         public const long DBL_SGN_MASK = -1 - 0x7fffffffffffffffL;
         public const long DBL_MANT_MASK = 0x000fffffffffffffL;
         public const long DBL_EXP_CLR_MASK = DBL_SGN_MASK | DBL_MANT_MASK;
+
+        public static int FastAbs(int value)
+        {
+            return (value + (value >> 31)) ^ (value >> 31);
+        }
 
         public static uint _lrotl(uint x, int y)
         {
