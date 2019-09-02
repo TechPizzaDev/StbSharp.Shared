@@ -1,16 +1,11 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace StbSharp
 {
     public static unsafe class CRuntime
     {
-        public static void SetArray<T>(T[] data, T value)
-        {
-            for (int i = 0; i < data.Length; ++i)
-                data[i] = value;
-        }
-
         #region Memory Management
 
         public static void* malloc(ulong size)
@@ -21,6 +16,7 @@ namespace StbSharp
         public static void* malloc(long size)
         {
             IntPtr ptr = Marshal.AllocHGlobal((IntPtr)size);
+            MemoryStatistics.Allocated();
             return ptr.ToPointer();
         }
 
@@ -50,34 +46,39 @@ namespace StbSharp
 
         #region Memory Manipulation
 
-        public static void memcpy(void* dst, void* src, long size)
+        public static void SetArray<T>(T[] data, T value)
         {
-            // this is fast and simple
-            Buffer.MemoryCopy(src, dst, size, size);
-
-            //var idstp = (int*)dst;
-            //var isrcp = (int*)src;
-            //// small optimization
-            //while (size > 4)
-            //{
-            //    *idstp++ = *isrcp++;
-            //    size -= 4;
-            //}
-            //
-            //var dstp = (byte*)idstp;
-            //var srcp = (byte*)isrcp;
-            //while (size-- > 0)
-            //    *dstp++ = *srcp++;
+            for (int i = 0; i < data.Length; ++i)
+                data[i] = value;
         }
 
-        public static void memcpy(void* a, void* b, ulong size)
+        public static void memcpy(void* dst, void* src, long size)
         {
-            memcpy(a, b, (long)size);
+            int* idst = (int*)dst;
+            int* isrc = (int*)src;
+            while (size >= sizeof(int))
+            {
+                *idst++ = *isrc++;
+                size -= sizeof(int);
+            }
+
+            byte* bdst = (byte*)idst;
+            byte* bsrc = (byte*)isrc;
+            while (size > 0)
+            {
+                *bdst++ = *bsrc++;
+                size--;
+            }
+        }
+
+        public static void memcpy(void* dst, void* src, ulong size)
+        {
+            memcpy(dst, src, (long)size);
         }
 
         public static void memmove(void* dst, void* src, long size)
         {
-            long bufferSize = Math.Min(size, 1024);
+            long bufferSize = Math.Min(size, 2048);
             byte* buffer = stackalloc byte[(int)bufferSize];
             byte* bsrc = (byte*)src;
             byte* bdst = (byte*)dst;
@@ -103,20 +104,21 @@ namespace StbSharp
         {
             byte* bptr = (byte*)ptr;
 
-            // micro optimization
+            // vectorized optimization
             if (value == 0)
             {
                 long* lbptr = (long*)bptr;
                 if (Environment.Is64BitProcess)
                 {
-                    while (size > sizeof(long))
+                    while (size >= sizeof(long))
                     {
                         *lbptr++ = 0;
                         size -= sizeof(long);
                     }
                 }
+
                 int* ibptr = (int*)lbptr;
-                while (size > sizeof(int))
+                while (size >= sizeof(int))
                 {
                     *ibptr++ = 0;
                     size -= sizeof(int);
@@ -124,8 +126,11 @@ namespace StbSharp
                 bptr = (byte*)ibptr;
             }
 
-            while (size-- > 0)
+            while (size > 0)
+            {
                 *bptr++ = value;
+                size--;
+            }
         }
 
         public static void memset(void* ptr, byte value, ulong size)
@@ -160,6 +165,37 @@ namespace StbSharp
         public const long DBL_SGN_MASK = -1 - 0x7fffffffffffffffL;
         public const long DBL_MANT_MASK = 0x000fffffffffffffL;
         public const long DBL_EXP_CLR_MASK = DBL_SGN_MASK | DBL_MANT_MASK;
+        
+        public static byte Paeth8(int a, int b, int c)
+        {
+            // original code
+            //int p = a + b - c;
+            //int pa = Math.Abs(p - a);
+            //int pb = Math.Abs(p - b);
+            //int pc = Math.Abs(p - c);
+
+            // optimized code
+            int pa = FastAbs(b - c);
+            int pb = FastAbs(a - c);
+            int pc = FastAbs(a + b - c - c);
+            if ((pa <= pb) && (pa <= pc))
+                return (byte)((a) & 0xff);
+            if (pb <= pc)
+                return (byte)((b) & 0xff);
+            return (byte)((c) & 0xff);
+        }
+
+        public static int Paeth32(int a, int b, int c)
+        {
+            int pa = FastAbs(b - c);
+            int pb = FastAbs(a - c);
+            int pc = FastAbs(a + b - c - c);
+            if ((pa <= pb) && (pa <= pc))
+                return a;
+            if (pb <= pc)
+                return b;
+            return c;
+        }
 
         public static int FastAbs(int value)
         {
