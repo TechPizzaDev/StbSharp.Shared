@@ -84,6 +84,10 @@ namespace StbSharp
             return byteFLG;
         }
 
+        /// <summary>
+        /// Creates a header with values applicable to a 
+        /// <see cref="DeflateStream"/> (.NET framework 4.5 and above).
+        /// </summary>
         public static ZlibHeader CreateForDeflateStream(CompressionLevel level)
         {
             return new ZlibHeader(8, 7, false, ConvertLevel(level));

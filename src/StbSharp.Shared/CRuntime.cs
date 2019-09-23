@@ -1,4 +1,6 @@
 using System;
+using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace StbSharp
@@ -145,7 +147,7 @@ namespace StbSharp
 
             while (size-- > 0)
                 if (*ap++ != *bp++)
-                    result += 1;
+                    result++;
 
             return result;
         }
@@ -164,8 +166,18 @@ namespace StbSharp
         public const long DBL_SGN_MASK = -1 - 0x7fffffffffffffffL;
         public const long DBL_MANT_MASK = 0x000fffffffffffffL;
         public const long DBL_EXP_CLR_MASK = DBL_SGN_MASK | DBL_MANT_MASK;
-        
-        public static byte Paeth8(int a, int b, int c)
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int FastAbs(int value)
+        {
+            int tmp = value >> 31;
+            value ^= tmp;
+            value += tmp & 1;
+            return value;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Paeth32(int a, int b, int c)
         {
             // original code
             //int p = a + b - c;
@@ -173,32 +185,15 @@ namespace StbSharp
             //int pb = Math.Abs(p - b);
             //int pc = Math.Abs(p - c);
 
-            // optimized code
             int pa = FastAbs(b - c);
             int pb = FastAbs(a - c);
             int pc = FastAbs(a + b - c - c);
-            if ((pa <= pb) && (pa <= pc))
-                return (byte)((a) & 0xff);
-            if (pb <= pc)
-                return (byte)((b) & 0xff);
-            return (byte)((c) & 0xff);
-        }
 
-        public static int Paeth32(int a, int b, int c)
-        {
-            int pa = FastAbs(b - c);
-            int pb = FastAbs(a - c);
-            int pc = FastAbs(a + b - c - c);
-            if ((pa <= pb) && (pa <= pc))
+            if (pa <= pb && pa <= pc)
                 return a;
             if (pb <= pc)
                 return b;
             return c;
-        }
-
-        public static int FastAbs(int value)
-        {
-            return (value + (value >> 31)) ^ (value >> 31);
         }
 
         public static uint _lrotl(uint x, int y)
@@ -212,25 +207,27 @@ namespace StbSharp
         /// <param name="number"></param>
         /// <param name="exponent"></param>
         /// <returns></returns>
-        public static double frexp(double number, int* exponent)
+        public static double frexp(double number, out int exponent)
         {
-            var bits = BitConverter.DoubleToInt64Bits(number);
-            var exp = (int)((bits & DBL_EXP_MASK) >> DBL_MANT_BITS);
-            *exponent = 0;
+            long bits = BitConverter.DoubleToInt64Bits(number);
+            int exp = (int)((bits & DBL_EXP_MASK) >> DBL_MANT_BITS);
 
             if (exp == 0x7ff || number == 0D)
+            {
                 number += number;
+                exponent = 0;
+            }
             else
             {
                 // Not zero and finite.
-                *exponent = exp - 1022;
+                exponent = exp - 1022;
                 if (exp == 0)
                 {
                     // Subnormal, scale number so that it is in [1, 2).
                     number *= BitConverter.Int64BitsToDouble(0x4350000000000000L); // 2^54
                     bits = BitConverter.DoubleToInt64Bits(number);
                     exp = (int)((bits & DBL_EXP_MASK) >> DBL_MANT_BITS);
-                    *exponent = exp - 1022 - 54;
+                    exponent = exp - 1022 - 54;
                 }
 
                 // Set exponent to -1 so that number is in [0.5, 1).
