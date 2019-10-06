@@ -203,9 +203,6 @@ namespace StbSharp
         /// <summary>
         /// This code had been borrowed from here: https://github.com/MachineCognitis/C.math.NET
         /// </summary>
-        /// <param name="number"></param>
-        /// <param name="exponent"></param>
-        /// <returns></returns>
         public static double frexp(double number, out int exponent)
         {
             long bits = BitConverter.DoubleToInt64Bits(number);
