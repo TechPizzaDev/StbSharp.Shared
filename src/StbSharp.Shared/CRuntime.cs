@@ -8,11 +8,6 @@ namespace StbSharp
     {
         #region Memory Management
 
-        public static void* malloc(ulong size)
-        {
-            return malloc((long)size);
-        }
-
         public static void* malloc(long size)
         {
             IntPtr ptr = Marshal.AllocHGlobal((IntPtr)size);
@@ -28,11 +23,6 @@ namespace StbSharp
             var ptr = new IntPtr(a);
             var result = Marshal.ReAllocHGlobal(ptr, new IntPtr(newSize));
             return result.ToPointer();
-        }
-
-        public static void* realloc(void* a, ulong newSize)
-        {
-            return realloc(a, (long)newSize);
         }
 
         public static void free(void* a)
@@ -70,12 +60,7 @@ namespace StbSharp
                 size--;
             }
         }
-
-        public static void memcpy(void* dst, void* src, ulong size)
-        {
-            memcpy(dst, src, (long)size);
-        }
-
+        
         public static void memmove(void* dst, void* src, long size)
         {
             long bufferSize = Math.Min(size, 2048);
@@ -93,11 +78,6 @@ namespace StbSharp
                 bdst += toCopy;
                 size -= toCopy;
             }
-        }
-
-        public static void memmove(void* dst, void* src, ulong size)
-        {
-            memmove(dst, src, (long)size);
         }
 
         public static void memset(void* ptr, byte value, long size)
@@ -133,11 +113,6 @@ namespace StbSharp
             }
         }
 
-        public static void memset(void* ptr, byte value, ulong size)
-        {
-            memset(ptr, value, (long)size);
-        }
-
         public static int memcmp(void* a, void* b, long size)
         {
             int result = 0;
@@ -151,9 +126,18 @@ namespace StbSharp
             return result;
         }
 
-        public static int memcmp(void* a, void* b, ulong size)
+        public static int memcmp<T>(Span<T> a, Span<T> b, long size)
+            where T : unmanaged
         {
-            return memcmp(a, b, (long)size);
+            int result = 0;
+            var ap = MemoryMarshal.AsBytes(a);
+            var bp = MemoryMarshal.AsBytes(b);
+
+            for (int i = 0; i < size; i++)
+               if(ap[i] != bp[i])
+                    result++;
+
+            return result;
         }
 
         #endregion
