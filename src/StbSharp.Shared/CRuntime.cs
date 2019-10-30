@@ -218,5 +218,19 @@ namespace StbSharp
         }
 
         #endregion
+
+        public static int strlen(ReadOnlySpan<byte> str)
+        {
+            int i = 0;
+            for (; i < str.Length;)
+            {
+                if (str[i] == '\0')
+                    break;
+                i++;
+            }
+            while (str[i] != '\0')
+                i++;
+            return i;
+        }
     }
 }
