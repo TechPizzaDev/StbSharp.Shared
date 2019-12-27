@@ -39,7 +39,9 @@ namespace StbSharp
         public FLevel Level { get; }
 
         public bool IsValid =>
-            CompressionMethod == 8 && CompressionInfo == 7 && !Dict &&
+            CompressionMethod == 8 && 
+            CompressionInfo == 7 && 
+            !Dict &&
             (GetCMF() * 256 + GetFLG()) % 31 == 0;
 
         private ZlibHeader(

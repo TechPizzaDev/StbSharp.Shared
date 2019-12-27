@@ -7,17 +7,17 @@ namespace StbSharp
 		private static int _allocations;
 
         /// <summary>
-        /// Gets the amount of pointers allocated using <see cref="CRuntime.malloc(long)"/>.
-        /// Use <see cref="CRuntime.free(void*)"/> to reduce this amount.
+        /// Gets the amount of pointers allocated using <see cref="CRuntime.MAlloc(long)"/>.
+        /// Use <see cref="CRuntime.Free(void*)"/> to reduce this amount.
         /// </summary>
         public static int Allocations => _allocations;
 
-		internal static void Allocated()
+		internal static void OnAllocate()
 		{
 			Interlocked.Increment(ref _allocations);
 		}
 
-		internal static void Freed()
+		internal static void OnFree()
 		{
 			Interlocked.Decrement(ref _allocations);
 		}

@@ -8,27 +8,27 @@ namespace StbSharp
     {
         #region Memory Management
 
-        public static void* malloc(long size)
+        public static void* MAlloc(long size)
         {
             IntPtr ptr = Marshal.AllocHGlobal((IntPtr)size);
-            MemoryStatistics.Allocated();
+            MemoryStatistics.OnAllocate();
             return ptr.ToPointer();
         }
 
-        public static void* realloc(void* a, long newSize)
+        public static void* ReAlloc(void* a, long newSize)
         {
             if (a == null)
-                return malloc(newSize);
+                return MAlloc(newSize);
 
             var ptr = new IntPtr(a);
             var result = Marshal.ReAllocHGlobal(ptr, new IntPtr(newSize));
             return result.ToPointer();
         }
 
-        public static void free(void* a)
+        public static void Free(void* a)
         {
             var ptr = new IntPtr(a);
-            MemoryStatistics.Freed();
+            MemoryStatistics.OnFree();
             Marshal.FreeHGlobal(ptr);
         }
 
@@ -42,7 +42,7 @@ namespace StbSharp
                 data[i] = value;
         }
 
-        public static void memcpy(void* dst, void* src, long size)
+        public static void MemCopy(void* dst, void* src, long size)
         {
             int* idst = (int*)dst;
             int* isrc = (int*)src;
@@ -61,18 +61,18 @@ namespace StbSharp
             }
         }
         
-        public static void memmove(void* dst, void* src, long size)
+        public static void MemMove(void* dst, void* src, long size)
         {
             long bufferSize = Math.Min(size, 2048);
             byte* buffer = stackalloc byte[(int)bufferSize];
-            byte* bsrc = (byte*)src;
-            byte* bdst = (byte*)dst;
+            var bsrc = (byte*)src;
+            var bdst = (byte*)dst;
 
             while (size > 0)
             {
                 long toCopy = Math.Min(size, bufferSize);
-                memcpy(buffer, bsrc, toCopy);
-                memcpy(bdst, buffer, toCopy);
+                MemCopy(buffer, bsrc, toCopy);
+                MemCopy(bdst, buffer, toCopy);
 
                 bsrc += toCopy;
                 bdst += toCopy;
@@ -80,14 +80,14 @@ namespace StbSharp
             }
         }
 
-        public static void memset(void* ptr, byte value, long size)
+        public static void MemSet(void* ptr, byte value, long size)
         {
             byte* bptr = (byte*)ptr;
 
             // vectorized optimization
             if (value == 0)
             {
-                long* lbptr = (long*)bptr;
+                var lbptr = (long*)bptr;
                 if (Environment.Is64BitProcess)
                 {
                     while (size >= sizeof(long))
@@ -96,14 +96,16 @@ namespace StbSharp
                         size -= sizeof(long);
                     }
                 }
-
-                int* ibptr = (int*)lbptr;
-                while (size >= sizeof(int))
+                else
                 {
-                    *ibptr++ = 0;
-                    size -= sizeof(int);
+                    var ibptr = (int*)lbptr;
+                    while (size >= sizeof(int))
+                    {
+                        *ibptr++ = 0;
+                        size -= sizeof(int);
+                    }
+                    bptr = (byte*)ibptr;
                 }
-                bptr = (byte*)ibptr;
             }
 
             while (size > 0)
@@ -113,8 +115,45 @@ namespace StbSharp
             }
         }
 
-        public static int memcmp(void* a, void* b, long size)
+        public static int MemCompare(void* a, void* b, long size)
         {
+            #region TODO: REMOVE ME
+            void* a1 = a;
+            void* b1 = b;
+            long size1 = size;
+            #endregion
+
+            if (Environment.Is64BitProcess)
+            {
+                var aLong = (long*)a;
+                var bLong = (long*)b;
+                while (size >= sizeof(long))
+                {
+                    if (*aLong != *bLong)
+                        break;
+                    aLong++;
+                    bLong++;
+                    size -= sizeof(long);
+                }
+                a = aLong;
+                b = bLong;
+            }
+            else
+            {
+                var aInt = (int*)a;
+                var bInt = (int*)b;
+                while (size >= sizeof(int))
+                {
+                    if (*aInt != *bInt)
+                        break;
+                    aInt++;
+                    bInt++;
+                    size -= sizeof(int);
+                }
+                a = aInt;
+                b = bInt;
+            }
+
             int result = 0;
             var ap = (byte*)a;
             var bp = (byte*)b;
@@ -123,32 +162,42 @@ namespace StbSharp
                 if (*ap++ != *bp++)
                     result++;
 
+            #region TODO: REMOVE ME
+
+            int result1 = 0;
+            var ap1 = (byte*)a1;
+            var bp1 = (byte*)b1;
+            while (size1-- > 0)
+                if (*ap1++ != *bp1++)
+                    result1++;
+
+            // TODO: remove this after testing the vectorized version out
+            if (result != result1)
+                throw new Exception();
+
+            #endregion
+
             return result;
         }
 
-        public static int memcmp<T>(Span<T> a, Span<T> b, long size)
+        public static int MemCompare<T>(Span<T> a, Span<T> b, long size)
             where T : unmanaged
         {
-            int result = 0;
-            var ap = MemoryMarshal.AsBytes(a);
-            var bp = MemoryMarshal.AsBytes(b);
+            if (size > a.Length || size > b.Length)
+                throw new ArgumentOutOfRangeException(nameof(size));
 
-            for (int i = 0; i < size; i++)
-               if(ap[i] != bp[i])
-                    result++;
-
-            return result;
+            fixed (T* ap = &MemoryMarshal.GetReference(a))
+            fixed (T* bp = &MemoryMarshal.GetReference(b))
+            {
+                byte* abp = (byte*)ap;
+                byte* bbp = (byte*)bp;
+                return MemCompare(abp, bbp, size);
+            }
         }
 
         #endregion
 
         #region Math
-
-        public const long DBL_EXP_MASK = 0x7ff0000000000000L;
-        public const int DBL_MANT_BITS = 52;
-        public const long DBL_SGN_MASK = -1 - 0x7fffffffffffffffL;
-        public const long DBL_MANT_MASK = 0x000fffffffffffffL;
-        public const long DBL_EXP_CLR_MASK = DBL_SGN_MASK | DBL_MANT_MASK;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int FastAbs(int value)
@@ -159,10 +208,9 @@ namespace StbSharp
             return value;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Paeth32(int a, int b, int c)
         {
-            // original code
+            // original math
             //int p = a + b - c;
             //int pa = Math.Abs(p - a);
             //int pb = Math.Abs(p - b);
@@ -179,18 +227,28 @@ namespace StbSharp
             return c;
         }
 
-        public static uint _lrotl(uint x, int y)
+        public static uint RotateBits(uint x, int y)
         {
             return (x << y) | (x >> (32 - y));
         }
 
         /// <summary>
-        /// This code had been borrowed from here: https://github.com/MachineCognitis/C.math.NET
+        /// Decomposes given floating point value into a
+        /// normalized fraction and an integral power of two.
+        /// <para>
+        /// This code has been borrowed from https://github.com/MachineCognitis/C.math.NET
+        /// </para>
         /// </summary>
-        public static double frexp(double number, out int exponent)
+        public static double FractionExponent(double number, out int exponent)
         {
+            const long DoubleExponentMask = 0x7ff0000000000000L;
+            const int DoubleMantissaBits = 52;
+            const long DoubleSignedMask = -1 - 0x7fffffffffffffffL;
+            const long DoubleMantissaMask = 0x000fffffffffffffL;
+            const long DoubleExponentCLRMask = DoubleSignedMask | DoubleMantissaMask;
+
             long bits = BitConverter.DoubleToInt64Bits(number);
-            int exp = (int)((bits & DBL_EXP_MASK) >> DBL_MANT_BITS);
+            int exp = (int)((bits & DoubleExponentMask) >> DoubleMantissaBits);
 
             if (exp == 0x7ff || number == 0D)
             {
@@ -206,12 +264,13 @@ namespace StbSharp
                     // Subnormal, scale number so that it is in [1, 2).
                     number *= BitConverter.Int64BitsToDouble(0x4350000000000000L); // 2^54
                     bits = BitConverter.DoubleToInt64Bits(number);
-                    exp = (int)((bits & DBL_EXP_MASK) >> DBL_MANT_BITS);
+                    exp = (int)((bits & DoubleExponentMask) >> DoubleMantissaBits);
                     exponent = exp - 1022 - 54;
                 }
 
                 // Set exponent to -1 so that number is in [0.5, 1).
-                number = BitConverter.Int64BitsToDouble((bits & DBL_EXP_CLR_MASK) | 0x3fe0000000000000L);
+                number = BitConverter.Int64BitsToDouble(
+                    (bits & DoubleExponentCLRMask) | 0x3fe0000000000000L);
             }
 
             return number;
@@ -219,7 +278,7 @@ namespace StbSharp
 
         #endregion
 
-        public static int strlen(ReadOnlySpan<byte> str)
+        public static int StringLength(ReadOnlySpan<byte> str)
         {
             int i = 0;
             for (; i < str.Length;)
@@ -228,8 +287,6 @@ namespace StbSharp
                     break;
                 i++;
             }
-            while (str[i] != '\0')
-                i++;
             return i;
         }
     }
