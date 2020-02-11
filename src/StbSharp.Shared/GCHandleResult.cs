@@ -7,8 +7,8 @@ namespace StbSharp
     {
         private GCHandle _handle;
 
+        public int Length { get; private set; }
         public bool IsAllocated => _handle.IsAllocated;
-        public int Length { get; }
         public IntPtr Pointer => _handle.AddrOfPinnedObject();
 
         public GCHandleResult(GCHandle handle, int length)
@@ -17,10 +17,25 @@ namespace StbSharp
             Length = length;
         }
 
-        public void Dispose()
+        protected virtual void Dispose(bool disposing)
         {
             if (IsAllocated)
+            {
                 _handle.Free();
+                _handle = default;
+                Length = 0;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~GCHandleResult()
+        {
+            Dispose(false);
         }
     }
 }
