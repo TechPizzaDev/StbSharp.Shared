@@ -7,12 +7,15 @@ namespace StbSharp
     {
         public int Length { get; private set; }
         public IntPtr Pointer { get; private set; }
-        public bool IsAllocated => Pointer != null;
+        public bool IsAllocated => Pointer != default;
 
         public HGlobalMemoryResult(IntPtr pointer, int length)
         {
             Pointer = pointer;
             Length = length;
+
+            if (Length != 0)
+                GC.AddMemoryPressure(Length);
         }
 
         public unsafe HGlobalMemoryResult(void* pointer, int length) :
@@ -26,6 +29,8 @@ namespace StbSharp
             {
                 Marshal.FreeHGlobal(Pointer);
                 Pointer = default;
+
+                GC.RemoveMemoryPressure(Length);
                 Length = 0;
             }
         }

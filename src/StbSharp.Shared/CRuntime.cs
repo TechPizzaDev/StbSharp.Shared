@@ -27,6 +27,9 @@ namespace StbSharp
 
         public static void Free(void* a)
         {
+            if (a == null)
+                return;
+
             var ptr = new IntPtr(a);
             MemoryStatistics.OnFree();
             Marshal.FreeHGlobal(ptr);
