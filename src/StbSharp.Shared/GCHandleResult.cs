@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace StbSharp
 {
-    public class GCHandleResult : IMemoryResult
+    public class GCHandleResult : IMemoryHolder
     {
         private GCHandle _handle;
 

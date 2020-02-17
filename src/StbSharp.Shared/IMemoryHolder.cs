@@ -2,7 +2,7 @@
 
 namespace StbSharp
 {
-    public interface IMemoryResult : IDisposable
+    public interface IMemoryHolder : IDisposable
     {
         int Length { get; }
         IntPtr Pointer { get; }

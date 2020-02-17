@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace StbSharp
 {
-    public class HGlobalMemoryResult : IMemoryResult
+    public class HGlobalMemoryResult : IMemoryHolder
     {
         public int Length { get; private set; }
         public IntPtr Pointer { get; private set; }
