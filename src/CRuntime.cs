@@ -203,8 +203,8 @@ namespace StbSharp
             if (size > a.Length || size > b.Length)
                 throw new ArgumentOutOfRangeException(nameof(size));
 
-            fixed (T* ap = &MemoryMarshal.GetReference(a))
-            fixed (T* bp = &MemoryMarshal.GetReference(b))
+            fixed (T* ap = a)
+            fixed (T* bp = b)
             {
                 byte* abp = (byte*)ap;
                 byte* bbp = (byte*)bp;
