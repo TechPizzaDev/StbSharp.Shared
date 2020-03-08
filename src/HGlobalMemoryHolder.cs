@@ -19,8 +19,8 @@ namespace StbSharp
                 GC.AddMemoryPressure(Length);
         }
 
-        public HGlobalMemoryHolder(void* pointer, int length) :
-            this((IntPtr)pointer, length)
+        public HGlobalMemoryHolder(void* pointer, int byteLength) :
+            this((IntPtr)pointer, byteLength)
         {
         }
 
