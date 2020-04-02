@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StbSharp.Shared", "src\StbSharp.Shared\StbSharp.Shared.csproj", "{E7E88A48-FFA6-40DA-9B3F-3866B32F03E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StbSharp.Shared", "src\StbSharp.Shared.csproj", "{1813D6FA-7A05-4422-BCD0-F342207FF954}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E7E88A48-FFA6-40DA-9B3F-3866B32F03E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E7E88A48-FFA6-40DA-9B3F-3866B32F03E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E7E88A48-FFA6-40DA-9B3F-3866B32F03E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E7E88A48-FFA6-40DA-9B3F-3866B32F03E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1813D6FA-7A05-4422-BCD0-F342207FF954}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1813D6FA-7A05-4422-BCD0-F342207FF954}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1813D6FA-7A05-4422-BCD0-F342207FF954}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1813D6FA-7A05-4422-BCD0-F342207FF954}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
