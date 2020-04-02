@@ -2,9 +2,9 @@
 
 namespace StbSharp
 {
-	public static class MemoryStatistics
-	{
-		private static int _allocations;
+    public static class MemoryStatistics
+    {
+        private static int _allocations;
 
         /// <summary>
         /// Gets the amount of pointers allocated using <see cref="CRuntime.MAlloc(long)"/>.
@@ -12,14 +12,14 @@ namespace StbSharp
         /// </summary>
         public static int Allocations => _allocations;
 
-		internal static void OnAllocate()
-		{
-			Interlocked.Increment(ref _allocations);
-		}
+        public static void OnAllocate()
+        {
+            Interlocked.Increment(ref _allocations);
+        }
 
-		internal static void OnFree()
-		{
-			Interlocked.Decrement(ref _allocations);
-		}
-	}
+        public static void OnFree()
+        {
+            Interlocked.Decrement(ref _allocations);
+        }
+    }
 }

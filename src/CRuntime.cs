@@ -10,9 +10,16 @@ namespace StbSharp
 
         public static void* MAlloc(long size)
         {
-            IntPtr ptr = Marshal.AllocHGlobal((IntPtr)size);
-            MemoryStatistics.OnAllocate();
-            return ptr.ToPointer();
+            try
+            {
+                IntPtr ptr = Marshal.AllocHGlobal((IntPtr)size);
+                MemoryStatistics.OnAllocate();
+                return ptr.ToPointer();
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public static void* ReAlloc(void* a, long newSize)
@@ -20,13 +27,23 @@ namespace StbSharp
             if (a == null)
                 return MAlloc(newSize);
 
-            var ptr = new IntPtr(a);
-            var result = Marshal.ReAllocHGlobal(ptr, new IntPtr(newSize));
-            return result.ToPointer();
+            try
+            {
+                var ptr = new IntPtr(a);
+                var result = Marshal.ReAllocHGlobal(ptr, new IntPtr(newSize));
+                return result.ToPointer();
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public static void Free(void* a)
         {
+            if (a == null)
+                return;
+
             var ptr = new IntPtr(a);
             MemoryStatistics.OnFree();
             Marshal.FreeHGlobal(ptr);

@@ -8,7 +8,7 @@ namespace StbSharp
         int Height { get; }
         int Components { get; }
 
-        void Fill(Span<byte> buffer, int dataOffset);
-        void Fill(Span<float> buffer, int dataOffset);
+        void Fill(Span<byte> destination, int dataOffset);
+        void Fill(Span<float> destination, int dataOffset);
     }
 }
