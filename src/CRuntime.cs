@@ -95,11 +95,14 @@ namespace StbSharp
             Unsafe.InitBlockUnaligned(ptr, value, size);
         }
 
-        public static void MemSet(void* ptr, byte value, int size)
+        public static void MemSet<T>(Span<T> span, byte value) 
+            where T : unmanaged
         {
-            if (size < 0)
-                throw new ArgumentOutOfRangeException(nameof(size));
-            MemSet(ptr, value, (uint)size);
+            var bytes = MemoryMarshal.AsBytes(span);
+            Unsafe.InitBlockUnaligned(
+                ref MemoryMarshal.GetReference(bytes),
+                value, 
+                (uint)bytes.Length);
         }
 
         public static int MemCompare(void* a, void* b, long size)
