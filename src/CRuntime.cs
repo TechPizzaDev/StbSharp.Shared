@@ -107,6 +107,8 @@ namespace StbSharp
 
         public static int MemCompare(void* a, void* b, long size)
         {
+            // TODO: use SIMD Vector instead
+
             var ap = (byte*)a;
             var bp = (byte*)b;
 
