@@ -179,20 +179,18 @@ namespace StbSharp
                 if (*ap++ != *bp++)
                     result++;
 
-            #region TODO: REMOVE ME
-
-            int result1 = 0;
-            var ap1 = (byte*)a1;
-            var bp1 = (byte*)b1;
-            while (size1-- > 0)
-                if (*ap1++ != *bp1++)
-                    result1++;
-
-            // TODO: remove this after testing the vectorized version out
-            if (result != result1)
-                throw new Exception();
-
-            #endregion
+            //// TODO: remove this after testing the vectorized version out
+            //int result1 = 0;
+            //var ap1 = (byte*)a1;
+            //var bp1 = (byte*)b1;
+            //while (size1-- > 0)
+            //    if (*ap1++ != *bp1++)
+            //        result1++;
+            //
+            //if (result != result1)
+            //    throw new Exception();
+            //
+            //#endregion
 
             return result;
         }
