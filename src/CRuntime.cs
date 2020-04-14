@@ -59,35 +59,28 @@ namespace StbSharp
                 data[i] = value;
         }
 
-        public static void MemCopy(void* dst, void* src, long size)
+        public static void MemCopy(void* dst, void* src, uint size)
         {
-            int* idst = (int*)dst;
-            int* isrc = (int*)src;
-            while (size >= sizeof(int))
-            {
-                *idst++ = *isrc++;
-                size -= sizeof(int);
-            }
-
-            byte* bdst = (byte*)idst;
-            byte* bsrc = (byte*)isrc;
-            while (size > 0)
-            {
-                *bdst++ = *bsrc++;
-                size--;
-            }
+            Unsafe.CopyBlockUnaligned(dst, src, size);
         }
-        
-        public static void MemMove(void* dst, void* src, long size)
+
+        public static void MemCopy(void* dst, void* src, int size)
         {
-            long bufferSize = Math.Min(size, 2048);
+            if (size < 0)
+                throw new ArgumentOutOfRangeException(nameof(size));
+            MemCopy(dst, src, (uint)size);
+        }
+
+        public static void MemMove(void* dst, void* src, uint size)
+        {
+            uint bufferSize = Math.Min(size, 2048);
             byte* buffer = stackalloc byte[(int)bufferSize];
             var bsrc = (byte*)src;
             var bdst = (byte*)dst;
 
             while (size > 0)
             {
-                long toCopy = Math.Min(size, bufferSize);
+                uint toCopy = Math.Min(size, bufferSize);
                 MemCopy(buffer, bsrc, toCopy);
                 MemCopy(bdst, buffer, toCopy);
 
@@ -97,83 +90,54 @@ namespace StbSharp
             }
         }
 
-        public static void MemSet(void* ptr, byte value, long size)
+        public static void MemSet(void* ptr, byte value, uint size)
         {
-            byte* bptr = (byte*)ptr;
+            Unsafe.InitBlockUnaligned(ptr, value, size);
+        }
 
-            // vectorized optimization
-            if (value == 0)
-            {
-                var lbptr = (long*)bptr;
-                if (Environment.Is64BitProcess)
-                {
-                    while (size >= sizeof(long))
-                    {
-                        *lbptr++ = 0;
-                        size -= sizeof(long);
-                    }
-                }
-                else
-                {
-                    var ibptr = (int*)lbptr;
-                    while (size >= sizeof(int))
-                    {
-                        *ibptr++ = 0;
-                        size -= sizeof(int);
-                    }
-                    bptr = (byte*)ibptr;
-                }
-            }
-
-            while (size > 0)
-            {
-                *bptr++ = value;
-                size--;
-            }
+        public static void MemSet<T>(Span<T> span, byte value) 
+            where T : unmanaged
+        {
+            var bytes = MemoryMarshal.AsBytes(span);
+            Unsafe.InitBlockUnaligned(
+                ref MemoryMarshal.GetReference(bytes),
+                value, 
+                (uint)bytes.Length);
         }
 
         public static int MemCompare(void* a, void* b, long size)
         {
-            #region TODO: REMOVE ME
-            void* a1 = a;
-            void* b1 = b;
-            long size1 = size;
-            #endregion
+            // TODO: use SIMD Vector instead
 
+            var ap = (byte*)a;
+            var bp = (byte*)b;
+
+            // these vectorized implementations should decrease 
+            // comparison time for memory that's equal
             if (Environment.Is64BitProcess)
             {
-                var aLong = (long*)a;
-                var bLong = (long*)b;
                 while (size >= sizeof(long))
                 {
-                    if (*aLong != *bLong)
+                    if (*(long*)ap != *(long*)bp)
                         break;
-                    aLong++;
-                    bLong++;
+                    ap += sizeof(long);
+                    bp += sizeof(long);
                     size -= sizeof(long);
                 }
-                a = aLong;
-                b = bLong;
             }
             else
             {
-                var aInt = (int*)a;
-                var bInt = (int*)b;
                 while (size >= sizeof(int))
                 {
-                    if (*aInt != *bInt)
+                    if (*(int*)ap != *(int*)bp)
                         break;
-                    aInt++;
-                    bInt++;
+                    ap += sizeof(int);
+                    bp += sizeof(int);
                     size -= sizeof(int);
                 }
-                a = aInt;
-                b = bInt;
             }
 
             int result = 0;
-            var ap = (byte*)a;
-            var bp = (byte*)b;
 
             while (size-- > 0)
                 if (*ap++ != *bp++)
@@ -195,7 +159,7 @@ namespace StbSharp
             return result;
         }
 
-        public static int MemCompare<T>(Span<T> a, Span<T> b, long size)
+        public static int MemCompare<T>(ReadOnlySpan<T> a, ReadOnlySpan<T> b, long size)
             where T : unmanaged
         {
             if (size > a.Length || size > b.Length)
@@ -204,9 +168,7 @@ namespace StbSharp
             fixed (T* ap = a)
             fixed (T* bp = b)
             {
-                byte* abp = (byte*)ap;
-                byte* bbp = (byte*)bp;
-                return MemCompare(abp, bbp, size);
+                return MemCompare(ap, bp, size);
             }
         }
 
