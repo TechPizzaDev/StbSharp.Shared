@@ -90,18 +90,18 @@ namespace StbSharp
             }
         }
 
-        public static void MemSet(void* ptr, byte value, uint size)
+        public static void MemSet(void* ptr, byte value, int size)
         {
-            Unsafe.InitBlockUnaligned(ptr, value, size);
+            Unsafe.InitBlockUnaligned(ptr, value, (uint)size);
         }
 
-        public static void MemSet<T>(Span<T> span, byte value) 
+        public static void MemSet<T>(Span<T> span, byte value)
             where T : unmanaged
         {
             var bytes = MemoryMarshal.AsBytes(span);
             Unsafe.InitBlockUnaligned(
                 ref MemoryMarshal.GetReference(bytes),
-                value, 
+                value,
                 (uint)bytes.Length);
         }
 
@@ -162,7 +162,8 @@ namespace StbSharp
         public static int MemCompare<T>(ReadOnlySpan<T> a, ReadOnlySpan<T> b, long size)
             where T : unmanaged
         {
-            if (size > a.Length || size > b.Length)
+            if (size > a.Length * sizeof(T) ||
+                size > b.Length * sizeof(T))
                 throw new ArgumentOutOfRangeException(nameof(size));
 
             fixed (T* ap = a)
@@ -195,7 +196,7 @@ namespace StbSharp
 
             int pa = FastAbs(b - c);
             int pb = FastAbs(a - c);
-            int pc = FastAbs(a + b - c - c);
+            int pc = FastAbs(a - c + b - c);
 
             if (pa <= pb && pa <= pc)
                 return a;
