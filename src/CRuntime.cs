@@ -8,11 +8,11 @@ namespace StbSharp
     {
         #region Memory Management
 
-        public static void* MAlloc(long size)
+        public static void* MAlloc(IntPtr size)
         {
             try
             {
-                IntPtr ptr = Marshal.AllocHGlobal((IntPtr)size);
+                IntPtr ptr = Marshal.AllocHGlobal(size);
                 MemoryStatistics.OnAllocate();
                 return ptr.ToPointer();
             }
@@ -22,7 +22,12 @@ namespace StbSharp
             }
         }
 
-        public static void* ReAlloc(void* a, long newSize)
+        public static void* MAlloc(int size)
+        {
+            return MAlloc((IntPtr)size);
+        }
+
+        public static void* ReAlloc(void* a, IntPtr newSize)
         {
             if (a == null)
                 return MAlloc(newSize);
@@ -30,13 +35,18 @@ namespace StbSharp
             try
             {
                 var ptr = new IntPtr(a);
-                var result = Marshal.ReAllocHGlobal(ptr, new IntPtr(newSize));
+                var result = Marshal.ReAllocHGlobal(ptr, newSize);
                 return result.ToPointer();
             }
             catch
             {
                 return null;
             }
+        }
+
+        public static void* ReAlloc(void* a, int newSize)
+        {
+            return ReAlloc(a, (IntPtr)newSize);
         }
 
         public static void Free(void* a)
@@ -53,12 +63,6 @@ namespace StbSharp
 
         #region Memory Manipulation
 
-        public static void SetArray<T>(T[] data, T value)
-        {
-            for (int i = 0; i < data.Length; ++i)
-                data[i] = value;
-        }
-
         public static void MemCopy(void* dst, void* src, uint size)
         {
             Unsafe.CopyBlockUnaligned(dst, src, size);
@@ -71,38 +75,11 @@ namespace StbSharp
             MemCopy(dst, src, (uint)size);
         }
 
-        public static void MemMove(void* dst, void* src, uint size)
+        public static void MemMove(void* dst, void* src, int size)
         {
-            uint bufferSize = Math.Min(size, 2048);
-            byte* buffer = stackalloc byte[(int)bufferSize];
-            var bsrc = (byte*)src;
-            var bdst = (byte*)dst;
-
-            while (size > 0)
-            {
-                uint toCopy = Math.Min(size, bufferSize);
-                MemCopy(buffer, bsrc, toCopy);
-                MemCopy(bdst, buffer, toCopy);
-
-                bsrc += toCopy;
-                bdst += toCopy;
-                size -= toCopy;
-            }
-        }
-
-        public static void MemSet(void* ptr, byte value, int size)
-        {
-            Unsafe.InitBlockUnaligned(ptr, value, (uint)size);
-        }
-
-        public static void MemSet<T>(Span<T> span, byte value)
-            where T : unmanaged
-        {
-            var bytes = MemoryMarshal.AsBytes(span);
-            Unsafe.InitBlockUnaligned(
-                ref MemoryMarshal.GetReference(bytes),
-                value,
-                (uint)bytes.Length);
+            var dstSpan = new Span<byte>(dst, size);
+            var srcSpan = new ReadOnlySpan<byte>(src, size);
+            srcSpan.CopyTo(dstSpan);
         }
 
         public static int MemCompare(void* a, void* b, long size)
@@ -111,8 +88,8 @@ namespace StbSharp
 
             var ap = (byte*)a;
             var bp = (byte*)b;
-
-            // these vectorized implementations should decrease 
+            
+            // these "vectorized" implementations should decrease 
             // comparison time for memory that's equal
             if (Environment.Is64BitProcess)
             {
