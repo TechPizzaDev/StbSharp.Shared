@@ -187,6 +187,11 @@ namespace StbSharp
             return (x << y) | (x >> (32 - y));
         }
 
+        public static ulong RotateBits(ulong x, int y)
+        {
+            return (x << y) | (x >> (64 - y));
+        }
+
         /// <summary>
         /// Decomposes given floating point value into a
         /// normalized fraction and an integral power of two.

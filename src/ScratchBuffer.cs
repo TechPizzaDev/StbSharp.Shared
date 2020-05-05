@@ -11,18 +11,10 @@ namespace StbSharp
 
         public bool IsEmpty => _span.IsEmpty;
 
-        public ScratchBuffer(Span<byte> existingBuffer, int minSize)
+        public ScratchBuffer(int minSize)
         {
-            if (existingBuffer.Length >= minSize)
-            {
-                _array = null;
-                _span = existingBuffer.Slice(0, minSize);
-            }
-            else // allocate if the assigned buffer is too small
-            {
-                _array = new byte[minSize];
-                _span = _array.AsSpan();
-            }
+            _array = new byte[minSize];
+            _span = _array.AsSpan();
         }
 
         public Span<byte> AsSpan() => _span;

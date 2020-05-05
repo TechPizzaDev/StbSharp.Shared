@@ -1,15 +1,18 @@
 using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace StbSharp
 {
-    public class ByteMemoryHolder : IMemoryHolder
+    public class MemoryHolder<T> : IMemoryHolder
+        where T : unmanaged
     {
-        public Memory<byte> Memory { get; private set; }
+        public Memory<T> Memory { get; private set; }
 
-        public int Length => Memory.Length;
-        public Span<byte> Span => Memory.Span;
+        public int Length => Memory.Length * Unsafe.SizeOf<T>();
+        public Span<byte> Span => MemoryMarshal.AsBytes(Memory.Span);
 
-        public ByteMemoryHolder(Memory<byte> memory)
+        public MemoryHolder(Memory<T> memory)
         {
             Memory = memory;
         }
@@ -28,7 +31,7 @@ namespace StbSharp
             GC.SuppressFinalize(this);
         }
 
-        ~ByteMemoryHolder()
+        ~MemoryHolder()
         {
             Dispose(false);
         }
