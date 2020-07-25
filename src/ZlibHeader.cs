@@ -57,9 +57,11 @@ namespace StbSharp
         public ZlibHeader(byte compressionMethod, byte compressionInfo, bool dict, FLevel level) : this()
         {
             if (compressionMethod > 15)
-                throw new ArgumentOutOfRangeException("Argument cannot be greater than 15.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(compressionMethod), "Argument cannot be greater than 15.");
             if (compressionInfo > 15)
-                throw new ArgumentOutOfRangeException("Argument cannot be greater than 15.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(compressionInfo), "Argument cannot be greater than 15.");
 
             CompressionMethod = compressionMethod;
             CompressionInfo = compressionInfo;

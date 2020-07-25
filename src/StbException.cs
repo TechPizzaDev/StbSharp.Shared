@@ -10,11 +10,11 @@ namespace StbSharp
         {
         }
 
-        public StbException(string message) : base(message)
+        public StbException(string? message) : base(message)
         {
         }
 
-        public StbException(string message, Exception innerException) : base(message, innerException)
+        public StbException(string? message, Exception? innerException) : base(message, innerException)
         {
         }
 
