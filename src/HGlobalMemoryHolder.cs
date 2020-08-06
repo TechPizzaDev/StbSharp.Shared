@@ -19,6 +19,7 @@ namespace StbSharp
                 GC.AddMemoryPressure(Length);
         }
 
+        [CLSCompliant(false)]
         public HGlobalMemoryHolder(void* pointer, int byteLength) :
             this((IntPtr)pointer, byteLength)
         {

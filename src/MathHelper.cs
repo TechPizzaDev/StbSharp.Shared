@@ -52,12 +52,14 @@ namespace StbSharp
                     right: c));
         }
 
+        [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint RotateBits(uint x, int y)
         {
             return (x << y) | (x >> (32 - y));
         }
 
+        [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong RotateBits(ulong x, int y)
         {

@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
@@ -6,6 +7,7 @@ namespace StbSharp
 {
     public static class VectorHelper
     {
+        [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Widen(Vector128<byte> source, out Vector128<ushort> low, out Vector128<ushort> high)
         {
@@ -20,6 +22,7 @@ namespace StbSharp
             high = Sse2.UnpackHigh(source, Vector128<byte>.Zero).AsInt16();
         }
 
+        [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector128<byte> Narrow(Vector128<ushort> low, Vector128<ushort> high)
         {

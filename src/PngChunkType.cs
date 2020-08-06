@@ -1,7 +1,7 @@
 
 namespace StbSharp
 {
-    public enum PngChunkType : uint
+    public enum PngChunkType
     {
         CgBI = ('C' << 24) + ('g' << 16) + ('B' << 8) + 'I',
         IHDR = ('I' << 24) + ('H' << 16) + ('D' << 8) + 'R',

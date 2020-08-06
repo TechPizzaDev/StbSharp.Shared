@@ -29,7 +29,8 @@ namespace StbSharp
         /// <param name="buffer">The span of bytes.</param>
         /// <param name="seed">The CRC seed value.</param>
         /// <returns>The checksum.</returns>
-        public static uint Calculate(ReadOnlySpan<byte> buffer, uint seed = 0)
+        [CLSCompliant(false)]
+        public static uint Calculate(ReadOnlySpan<byte> buffer, uint seed)
         {
             if (buffer.IsEmpty)
                 return seed;
