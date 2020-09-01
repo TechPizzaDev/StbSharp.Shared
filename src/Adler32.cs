@@ -1,3 +1,7 @@
+// Based on:
+// https://github.com/SixLabors/ImageSharp/blob/master/src/ImageSharp/Formats/Png/Zlib/Adler32.css
+// https://github.com/chromium/chromium/blob/master/third_party/zlib/adler32_simd.c
+
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
@@ -5,8 +9,6 @@ using System.Runtime.Intrinsics.X86;
 
 namespace StbSharp
 {
-    // Heavily based on ImageSharp
-
     public static class Adler32
     {
         // Largest prime smaller than 65536
@@ -44,7 +46,6 @@ namespace StbSharp
             return CalculateScalar(buffer, seed);
         }
 
-        // Based on https://github.com/chromium/chromium/blob/master/third_party/zlib/adler32_simd.c
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static unsafe uint CalculateSse(ReadOnlySpan<byte> buffer, uint seed)
         {

@@ -1,3 +1,7 @@
+// Based on:
+// https://github.com/SixLabors/ImageSharp/blob/master/src/ImageSharp/Formats/Png/Zlib/Crc32.cs
+// https://github.com/chromium/chromium/blob/master/third_party/zlib/crc32_simd.c
+
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -6,8 +10,6 @@ using System.Runtime.Intrinsics.X86;
 
 namespace StbSharp
 {
-    // Heavily based on ImageSharp
-
     public static class Crc32
     {
         private const int MinBufferSize = 64;
@@ -43,7 +45,6 @@ namespace StbSharp
             return CalculateScalar(seed, buffer);
         }
 
-        // Based on https://github.com/chromium/chromium/blob/master/third_party/zlib/crc32_simd.c
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static unsafe uint CalculateSse(uint crc, ReadOnlySpan<byte> buffer)
         {
