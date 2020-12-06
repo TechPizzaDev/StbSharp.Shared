@@ -161,7 +161,7 @@ namespace StbSharp
                 x1 = Sse2.Xor(x1, x2);
 
                 crc = (uint)Sse41.Extract(x1.AsInt32(), 1);
-                return buffer.Length - chunksize == 0 ? crc : CalculateScalar(crc, buffer.Slice(chunksize));
+                return buffer.Length - chunksize == 0 ? crc : CalculateScalar(crc, buffer[chunksize..]);
             }
         }
 
