@@ -7,12 +7,19 @@ namespace StbSharp
     public static class MathHelper
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Abs(int x)
+        {
+            int y = x >> 31;
+            return (x ^ y) - y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte Paeth(byte a, byte b, byte c)
         {
             int p = a + b - c;
-            int pa = Math.Abs(p - a);
-            int pb = Math.Abs(p - b);
-            int pc = Math.Abs(p - c);
+            int pa = Abs(p - a);
+            int pb = Abs(p - b);
+            int pc = Abs(p - c);
 
             if (pa <= pb && pa <= pc)
                 return a;
