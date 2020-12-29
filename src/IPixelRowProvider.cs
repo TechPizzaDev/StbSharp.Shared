@@ -6,10 +6,12 @@ namespace StbSharp
     {
         int Width { get; }
         int Height { get; }
+
+        // TODO: Use some kind of component definition system.
         int Components { get; }
         int Depth { get; }
 
-        void GetRow(int row, Span<byte> destination);
-        void GetRow(int row, Span<float> destination);
+        void GetByteRow(int row, Span<byte> destination);
+        void GetFloatRow(int row, Span<float> destination);
     }
 }
