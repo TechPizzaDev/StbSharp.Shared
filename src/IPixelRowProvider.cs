@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Threading;
 
 namespace StbSharp
 {
     public interface IPixelRowProvider
     {
+        CancellationToken CancellationToken { get; }
+     
         int Width { get; }
         int Height { get; }
 
