@@ -21,8 +21,8 @@ namespace StbSharp
 
         public static ReadOnlySpan<byte> Tap1Tap2 => new byte[]
         {
-                32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, // tap1
-                16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 // tap2
+            32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, // tap1
+            16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 // tap2
         };
 
         /// <summary>
@@ -31,7 +31,6 @@ namespace StbSharp
         /// <param name="buffer">The span of bytes.</param>
         /// <param name="seed">The Adler32 seed value.</param>
         /// <returns>The checksum.</returns>
-        [CLSCompliant(false)]
         public static uint Calculate(ReadOnlySpan<byte> buffer, uint seed)
         {
             if (buffer.IsEmpty)
@@ -64,7 +63,7 @@ namespace StbSharp
             fixed (byte* tapPtr = Tap1Tap2)
             {
                 index += (int)blocks * BLOCK_SIZE;
-                var srcPtr = bufferPtr;
+                byte* srcPtr = bufferPtr;
 
                 // _mm_setr_epi8 on x86
                 Vector128<sbyte> tap1 = Sse2.LoadVector128((sbyte*)tapPtr);
@@ -174,7 +173,7 @@ namespace StbSharp
 
             fixed (byte* bufferPtr = buffer)
             {
-                var src = bufferPtr;
+                byte* src = bufferPtr;
                 int length = buffer.Length;
 
                 while (length > 0)
