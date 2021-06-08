@@ -30,25 +30,25 @@ namespace StbSharp
 
         public static Vector<byte> Paeth(Vector<byte> a, Vector<byte> b, Vector<byte> c)
         {
-            Vector.Widen(a, out var a1, out var a2);
-            Vector.Widen(b, out var b1, out var b2);
-            Vector.Widen(c, out var c1, out var c2);
+            Vector.Widen(a, out Vector<ushort> a1, out Vector<ushort> a2);
+            Vector.Widen(b, out Vector<ushort> b1, out Vector<ushort> b2);
+            Vector.Widen(c, out Vector<ushort> c1, out Vector<ushort> c2);
 
-            var p1 = Paeth(Vector.AsVectorInt16(a1), Vector.AsVectorInt16(b1), Vector.AsVectorInt16(c1));
-            var p2 = Paeth(Vector.AsVectorInt16(a2), Vector.AsVectorInt16(b2), Vector.AsVectorInt16(c2));
+            Vector<short> p1 = Paeth(Vector.AsVectorInt16(a1), Vector.AsVectorInt16(b1), Vector.AsVectorInt16(c1));
+            Vector<short> p2 = Paeth(Vector.AsVectorInt16(a2), Vector.AsVectorInt16(b2), Vector.AsVectorInt16(c2));
             return Vector.AsVectorByte(Vector.Narrow(p1, p2));
         }
 
         private static Vector<short> Paeth(Vector<short> a, Vector<short> b, Vector<short> c)
         {
-            var p = a + b - c;
-            var pa = Vector.Abs(p - a);
-            var pb = Vector.Abs(p - b);
-            var pc = Vector.Abs(p - c);
+            Vector<short> p = a + b - c;
+            Vector<short> pa = Vector.Abs(p - a);
+            Vector<short> pb = Vector.Abs(p - b);
+            Vector<short> pc = Vector.Abs(p - c);
 
-            var pa_pb = Vector.LessThanOrEqual(pa, pb);
-            var pa_pc = Vector.LessThanOrEqual(pa, pc);
-            var pb_pc = Vector.LessThanOrEqual(pb, pc);
+            Vector<short> pa_pb = Vector.LessThanOrEqual(pa, pb);
+            Vector<short> pa_pc = Vector.LessThanOrEqual(pa, pc);
+            Vector<short> pb_pc = Vector.LessThanOrEqual(pb, pc);
 
             return Vector.ConditionalSelect(
                 condition: Vector.BitwiseAnd(pa_pb, pa_pc),
@@ -57,20 +57,6 @@ namespace StbSharp
                     condition: pb_pc,
                     left: b,
                     right: c));
-        }
-
-        [CLSCompliant(false)]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static uint RotateBits(uint x, int y)
-        {
-            return (x << y) | (x >> (32 - y));
-        }
-
-        [CLSCompliant(false)]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong RotateBits(ulong x, int y)
-        {
-            return (x << y) | (x >> (64 - y));
         }
 
         /// <summary>

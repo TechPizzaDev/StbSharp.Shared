@@ -103,7 +103,7 @@ namespace StbSharp
             byte CompressionInfo = Convert.ToByte((cmf & 0xF0) >> 4);
             byte FCheck = Convert.ToByte(flg & 0x1F);
             bool FDict = Convert.ToBoolean(Convert.ToByte((flg & 0x20) >> 5));
-            var Level = (FLevel)Convert.ToByte((flg & 0xC0) >> 6);
+            FLevel Level = (FLevel)Convert.ToByte((flg & 0xC0) >> 6);
 
             return new ZlibHeader(CompressionMethod, CompressionInfo, FCheck, FDict, Level);
         }

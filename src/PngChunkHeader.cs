@@ -12,7 +12,6 @@ namespace StbSharp
         public bool IsPublic => ((uint)Type & (1 << 21)) == 0;
         public bool IsSafeToCopy => ((uint)Type & (1 << 21)) == 1;
 
-        [CLSCompliant(false)]
         public PngChunkHeader(uint length, PngChunkType type)
         {
             if (length > int.MaxValue)

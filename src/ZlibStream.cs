@@ -32,7 +32,7 @@ namespace StbSharp.ImageWrite
             _deflater = new DeflateStream(stream, compressionLevel, leaveOpen: true);
             _leaveOpen = leaveOpen;
 
-            var header = ZlibHeader.CreateForDeflateStream(compressionLevel);
+            ZlibHeader header = ZlibHeader.CreateForDeflateStream(compressionLevel);
             _deflater.BaseStream.Write(stackalloc byte[] {
                 header.GetCMF(),
                 header.GetFLG()
@@ -78,7 +78,7 @@ namespace StbSharp.ImageWrite
         {
             if (_deflater != null && disposing)
             {
-                var baseStream = BaseStream;
+                Stream baseStream = BaseStream;
                 _deflater.Dispose();
                 _deflater = null!;
 
