@@ -1,6 +1,6 @@
 // Based on:
-// https://github.com/SixLabors/ImageSharp/blob/master/src/ImageSharp/Formats/Png/Zlib/Adler32.css
-// https://github.com/chromium/chromium/blob/master/third_party/zlib/adler32_simd.c
+// https://github.com/SixLabors/ImageSharp/blob/d105ab4273641cbd8a1f5b8bd222da306d9dc8bf/src/ImageSharp/Compression/Zlib/Adler32.cs
+// https://github.com/chromium/chromium/blob/df892dc3997fd2deedf0a01b4c9a089e458043e7/third_party/zlib/adler32_simd.c
 
 using System;
 using System.Runtime.CompilerServices;

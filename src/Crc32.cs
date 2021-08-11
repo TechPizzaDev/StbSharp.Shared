@@ -1,6 +1,6 @@
 // Based on:
-// https://github.com/SixLabors/ImageSharp/blob/master/src/ImageSharp/Formats/Png/Zlib/Crc32.cs
-// https://github.com/chromium/chromium/blob/master/third_party/zlib/crc32_simd.c
+// https://github.com/SixLabors/ImageSharp/blob/d105ab4273641cbd8a1f5b8bd222da306d9dc8bf/src/ImageSharp/Compression/Zlib/Crc32.cs
+// https://github.com/chromium/chromium/blob/df892dc3997fd2deedf0a01b4c9a089e458043e7/third_party/zlib/crc32_simd.c
 
 using System;
 using System.Runtime.CompilerServices;
@@ -19,11 +19,11 @@ namespace StbSharp
         // the CRC32+Barrett polynomials given at the end of the paper.
         private static readonly ulong[] K05Poly =
         {
-                0x0154442bd4, 0x01c6e41596, // k1, k2
-                0x01751997d0, 0x00ccaa009e, // k3, k4
-                0x0163cd6124, 0x0000000000, // k5, k0
-                0x01db710641, 0x01f7011641 // polynomial
-            };
+            0x0154442bd4, 0x01c6e41596, // k1, k2
+            0x01751997d0, 0x00ccaa009e, // k3, k4
+            0x0163cd6124, 0x0000000000, // k5, k0
+            0x01db710641, 0x01f7011641 // polynomial
+        };
 
         /// <summary>
         /// Calculates a CRC checksum based on a seed.
